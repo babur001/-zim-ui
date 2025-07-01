@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Command as CommandPrimitive } from "cmdk";
-import { Loader2, Loader2Icon, LoaderCircle, LoaderIcon, LoaderPinwheel, SearchIcon } from "lucide-react";
+import { LoaderIcon, SearchIcon } from "lucide-react";
 
 import { cn } from "#/lib/utils";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "#/components/dialog";
@@ -52,7 +52,7 @@ function CommandInput({ className, isLoading = false, ...props }: React.Componen
       <CommandPrimitive.Input
         data-slot="command-input"
         className={cn(
-          "placeholder:text-accent flex h-10 w-full rounded-md bg-transparent py-3 text-base outline-hidden disabled:cursor-not-allowed disabled:opacity-50",
+          "placeholder:text-accent/60 flex h-10 w-full rounded-md bg-transparent py-3 text-base outline-hidden disabled:cursor-not-allowed disabled:opacity-50",
           className
         )}
         {...props}
@@ -92,7 +92,7 @@ function CommandItem({ className, ...props }: React.ComponentProps<typeof Comman
     <CommandPrimitive.Item
       data-slot="command-item"
       className={cn(
-        "data-[selected=true]:bg-background px-2 h-10 data-[checked=true]:bg-background data-[checked=true]:border-[0.25px] border-gray-300 data-[selected=true]:text-accent-foreground [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-sm text-sm outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "data-[selected=true]:bg-background/90 px-2 h-10 data-[checked=true]:bg-background duration-200 data-[checked=true]:border-[0.25px] border-gray-300 data-[selected=true]:text-accent-foreground [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-sm text-sm outline-hidden select-none data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className
       )}
       {...props}
