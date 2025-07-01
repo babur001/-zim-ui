@@ -9,48 +9,72 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SelectTestPageRouteImport } from './routes/select-test-page'
+import { Route as ButtonTestPageRouteImport } from './routes/button-test-page'
 import { Route as BlogRouteImport } from './routes/blog'
-import { Route as IndexRouteImport } from './routes/index'
 
+const SelectTestPageRoute = SelectTestPageRouteImport.update({
+  id: '/select-test-page',
+  path: '/select-test-page',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ButtonTestPageRoute = ButtonTestPageRouteImport.update({
+  id: '/button-test-page',
+  path: '/button-test-page',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BlogRoute = BlogRouteImport.update({
   id: '/blog',
   path: '/blog',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
   '/blog': typeof BlogRoute
+  '/button-test-page': typeof ButtonTestPageRoute
+  '/select-test-page': typeof SelectTestPageRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
   '/blog': typeof BlogRoute
+  '/button-test-page': typeof ButtonTestPageRoute
+  '/select-test-page': typeof SelectTestPageRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
   '/blog': typeof BlogRoute
+  '/button-test-page': typeof ButtonTestPageRoute
+  '/select-test-page': typeof SelectTestPageRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/blog'
+  fullPaths: '/blog' | '/button-test-page' | '/select-test-page'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/blog'
-  id: '__root__' | '/' | '/blog'
+  to: '/blog' | '/button-test-page' | '/select-test-page'
+  id: '__root__' | '/blog' | '/button-test-page' | '/select-test-page'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
   BlogRoute: typeof BlogRoute
+  ButtonTestPageRoute: typeof ButtonTestPageRoute
+  SelectTestPageRoute: typeof SelectTestPageRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/select-test-page': {
+      id: '/select-test-page'
+      path: '/select-test-page'
+      fullPath: '/select-test-page'
+      preLoaderRoute: typeof SelectTestPageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/button-test-page': {
+      id: '/button-test-page'
+      path: '/button-test-page'
+      fullPath: '/button-test-page'
+      preLoaderRoute: typeof ButtonTestPageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/blog': {
       id: '/blog'
       path: '/blog'
@@ -58,19 +82,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
   BlogRoute: BlogRoute,
+  ButtonTestPageRoute: ButtonTestPageRoute,
+  SelectTestPageRoute: SelectTestPageRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

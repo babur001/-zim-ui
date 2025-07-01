@@ -3,7 +3,7 @@
   "type": "module",
   "version": "0.0.0",
   "exports": {
-    ".": "./src/components/select.tsx",
+    ".": "./src/components/index.ts",
     "./css": "./src/output.css"
   },
   "scripts": {},

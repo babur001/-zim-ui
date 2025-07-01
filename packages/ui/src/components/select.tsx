@@ -130,7 +130,7 @@ export function Select<T extends object>({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" role="combobox" aria-expanded={open} className="w-[400px] justify-between">
+        <Button variant="secondary" role="combobox" aria-expanded={open} className="w-[400px] justify-between">
           {value ? value.title : <span className="text-accent font-normal">{placeholder}</span>}
           <div className="flex items-center gap-3">
             {value && (
