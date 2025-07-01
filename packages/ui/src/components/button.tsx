@@ -3,6 +3,7 @@ import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "#/lib/utils";
+import { Spin } from "./Spin";
 
 const buttonVariants = cva(
   "inline-flex items-center group justify-center hover:ring-3 ring-[#e5e7eb] hover:scale-101 duration-150 gap-2 whitespace-nowrap cursor-pointer rounded-md text-base font-normal transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-5 shrink-0 [&_svg]:shrink-0 [&_svg]:stroke-[1.25] outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 aria-invalid:border-destructive",
@@ -34,14 +35,21 @@ function Button({
   variant,
   size,
   asChild = false,
+  loading = false,
+  children,
   ...props
 }: React.ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean;
+    loading?: boolean;
   }) {
   const Comp = asChild ? Slot : "button";
 
-  return <Comp data-slot="button" className={cn(buttonVariants({ variant, size, className }))} {...props} />;
+  return (
+    <Comp data-slot="button" disabled={loading} className={cn(buttonVariants({ variant, size, className }))} {...props}>
+      {loading ? <Spin isLoading={loading} /> : children}
+    </Comp>
+  );
 }
 
 export { Button, buttonVariants };

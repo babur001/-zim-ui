@@ -6,6 +6,7 @@ import { LoaderIcon, SearchIcon } from "lucide-react";
 
 import { cn } from "#/lib/utils";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "#/components/dialog";
+import { Spin } from "./Spin";
 
 function Command({ className, ...props }: React.ComponentProps<typeof CommandPrimitive>) {
   return (
@@ -57,7 +58,7 @@ function CommandInput({ className, isLoading = false, ...props }: React.Componen
         )}
         {...props}
       />
-      <LoaderIcon className="animate-spin text-black size-5 opacity-0 data-[loading=true]:opacity-100" data-loading={isLoading} />
+      <Spin size="default" isLoading={isLoading} />
     </div>
   );
 }

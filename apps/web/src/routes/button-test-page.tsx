@@ -6,7 +6,7 @@ const ButtonTestPage = () => {
   return (
     <div className="grid grid-cols-5 mx-auto gap-5 py-10 px-5 ">
       <Button size="default" variant="default">
-        ZimZim avtomatlashtirish <ArrowRight className="group-hover:translate-x-1.5 duration-300" />
+        ZimZim <ArrowRight className="group-hover:translate-x-1.5 duration-300" />
       </Button>
       <Button size="default" variant="secondary">
         Button secondary
@@ -53,7 +53,7 @@ const ButtonTestPage = () => {
         Button ghost
       </Button>
 
-      <div className="flex gap-5 col-span-2">
+      <div className="flex gap-5 col-span-5">
         <Button size="icon" variant="default">
           <ArrowRightIcon />
         </Button>
@@ -70,6 +70,22 @@ const ButtonTestPage = () => {
           <X />
         </Button>
       </div>
+
+      <Button loading={true} size="default" variant="default">
+        ZimZim <ArrowRight className="group-hover:translate-x-1.5 duration-300" />
+      </Button>
+      <Button loading={true} size="default" variant="secondary">
+        Button secondary
+      </Button>
+      <Button loading={true} size="default" variant="destructive">
+        Button
+      </Button>
+      <Button loading={true} size="default" variant="link">
+        Button link
+      </Button>
+      <Button loading={true} size="default" variant="ghost">
+        Button ghost
+      </Button>
     </div>
   );
 };
