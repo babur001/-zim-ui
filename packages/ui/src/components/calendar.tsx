@@ -16,9 +16,8 @@ import {
 } from "react-aria-components";
 
 import { cn } from "#/lib/utils";
-import dayjs from "dayjs";
 import "dayjs/plugin/calendar";
-import { getLocalTimeZone, parseDate, today } from "@internationalized/date";
+import { getLocalTimeZone, today } from "@internationalized/date";
 import { Button } from "./button";
 
 interface BaseCalendarProps {

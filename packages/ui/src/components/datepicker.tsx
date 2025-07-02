@@ -1,20 +1,16 @@
 import { Button } from "#/components/button";
 import { Popover, PopoverContent, PopoverTrigger } from "#/components/popover";
 import { cn } from "#/lib/utils";
-import { Calendar, RangeCalendar } from "#/components/calendar";
+import { RangeCalendar } from "#/components/calendar";
 import dayjs from "dayjs";
-import { CalendarIcon, CornerDownLeft, Regex } from "lucide-react";
+import { CalendarIcon, CornerDownLeft } from "lucide-react";
 import * as React from "react";
-import { Input } from "./input";
-import { withMask } from "use-mask-input";
-import "dayjs/locale/ru";
-import { fromDate, getLocalTimeZone, parseDate, toCalendarDate, toCalendarDateTime, toLocalTimeZone } from "@internationalized/date";
-
-dayjs.locale("ru");
+import { CalendarDate, getLocalTimeZone, today } from "@internationalized/date";
+import { DateField, DateInput, DateSegment, FieldError, type DateValue } from "react-aria-components";
 
 const datePattern = /^(\d{2})\/(\d{2})\/(\d{4})$/;
 
-export function isValidDate(dateStr: string): boolean {
+function isValidDate(dateStr: string): boolean {
   // Match pattern dd/mm/yyyy using RegExp
   const match = dateStr.match(datePattern);
 
@@ -39,27 +35,18 @@ export function isValidDate(dateStr: string): boolean {
 }
 
 export function DateRangePicker({ className }: React.HTMLAttributes<HTMLDivElement>) {
-  const [date, setDate] = React.useState<{ from: Date | undefined; to: Date | undefined }>({
+  const [date, setDate] = React.useState<{ from: DateValue | undefined; to: DateValue | undefined }>({
     from: undefined,
     to: undefined,
   });
 
-  const [inputDate, setInputDate] = React.useState<{ from: Date | undefined; to: Date | undefined }>({
+  const [inputDate, setInputDate] = React.useState<{ from: DateValue | undefined; to: DateValue | undefined }>({
     from: undefined,
     to: undefined,
   });
   const [isOpen, setIsOpen] = React.useState(false);
 
-  const ref_dateFrom = React.useRef("");
-  const ref_dateTo = React.useRef("");
-
-  const stringToDate = (dateStr: string) => {
-    const match = dateStr.match(datePattern);
-
-    const [_, dd, mm, yyyy] = match!;
-
-    return dayjs(`${yyyy}-${mm}-${dd}`, "YYYY-MM-DD", true).toDate();
-  };
+  const isInputtedDateRangeValid = dayjs(inputDate.from?.toString()).isBefore(inputDate.to?.toString());
 
   return (
     <div className={cn("grid gap-2", className)}>
@@ -77,12 +64,12 @@ export function DateRangePicker({ className }: React.HTMLAttributes<HTMLDivEleme
               {date?.from ? (
                 date.to ? (
                   <>
-                    <span>{dayjs(date.from).format("DD MMMM YYYY")}</span>
+                    <span>{dayjs(date.from.toDate(getLocalTimeZone())).format("DD MMMM YYYY")}</span>
                     <span>-</span>
-                    <span>{dayjs(date.to).format("DD MMMM YYYY")}</span>
+                    <span>{dayjs(date.to.toDate(getLocalTimeZone())).format("DD MMMM YYYY")}</span>
                   </>
                 ) : (
-                  <span>{dayjs(date.from).format("DD-MM-YYYY")}</span>
+                  <span>{dayjs(date.from.toDate(getLocalTimeZone())).format("DD-MM-YYYY")}</span>
                 )
               ) : (
                 <span>Sanani tanlang</span>
@@ -96,15 +83,15 @@ export function DateRangePicker({ className }: React.HTMLAttributes<HTMLDivEleme
               value={
                 date.from && date.to
                   ? {
-                      start: fromDate(date.from, getLocalTimeZone()),
-                      end: fromDate(date.to, getLocalTimeZone()),
+                      start: date.from,
+                      end: date.to,
                     }
                   : undefined
               }
               onChange={(e) => {
                 const newDateRange = {
-                  from: e.start.toDate(getLocalTimeZone()),
-                  to: e.end.toDate(getLocalTimeZone()),
+                  from: e.start,
+                  to: e.end,
                 };
 
                 setIsOpen(false);
@@ -113,39 +100,48 @@ export function DateRangePicker({ className }: React.HTMLAttributes<HTMLDivEleme
               }}
             />
 
-            <div className="flex flex-col justify-between flex-1">
+            <div className="flex flex-col justify-between flex-1 w-48">
               <div className="space-y-3">
                 <div className="space-y-1">
                   <span className="block text-sm text-accent font-light">Start</span>
-                  <Input
+
+                  <DateField
+                    minValue={new CalendarDate(2000, 1, 1)}
+                    maxValue={today(getLocalTimeZone())}
+                    value={inputDate.from}
                     onChange={(e) => {
-                      ref_dateFrom.current = e.currentTarget.value;
+                      setInputDate((prev) => ({
+                        ...prev,
+                        from: e ?? undefined,
+                      }));
                     }}
-                    defaultValue={inputDate.from ? dayjs(inputDate.from).format("DD/MM/YYYY") : undefined}
-                    placeholder="01/01/2025"
-                    ref={withMask("99/99/9999", {
-                      greedy: false,
-                      placeholder: "",
-                      showMaskOnFocus: false,
-                      showMaskOnHover: false,
-                    })}
-                  />
+                  >
+                    <DateInput className="bg-white rounded-md border-[0.25px] border-accent/40 focus-within:ring-2 ring-ring duration-200 h-12 flex items-center px-2">
+                      {(segment) => <DateSegment className="data-[focused=true]:ring-2 outline-0 rounded-xs !ring-primary/90" segment={segment} />}
+                    </DateInput>
+                    <FieldError className="text-xs text-destructive" />
+                  </DateField>
                 </div>
 
                 <div className="space-y-1">
                   <span className="block text-sm text-accent font-light">End</span>
-                  <Input
+
+                  <DateField
+                    minValue={inputDate.from}
+                    maxValue={today(getLocalTimeZone())}
+                    value={inputDate.to}
                     onChange={(e) => {
-                      ref_dateTo.current = e.currentTarget.value;
+                      setInputDate((prev) => ({
+                        ...prev,
+                        to: e ?? undefined,
+                      }));
                     }}
-                    defaultValue={inputDate.to ? dayjs(inputDate.to).format("DD/MM/YYYY") : undefined}
-                    placeholder="01/01/2025"
-                    ref={withMask("99/99/9999", {
-                      placeholder: "",
-                      showMaskOnFocus: false,
-                      showMaskOnHover: false,
-                    })}
-                  />
+                  >
+                    <DateInput className="bg-white rounded-md border-[0.25px] border-accent/40 focus-within:ring-2 ring-ring duration-200 h-12 flex items-center px-2">
+                      {(segment) => <DateSegment className="data-[focused=true]:ring-2 outline-0 rounded-xs !ring-primary/90" segment={segment} />}
+                    </DateInput>
+                    <FieldError className="text-xs text-destructive" />
+                  </DateField>
                 </div>
               </div>
 
@@ -153,15 +149,13 @@ export function DateRangePicker({ className }: React.HTMLAttributes<HTMLDivEleme
                 variant="secondary"
                 size="sm"
                 className="w-full"
+                disabled={!isInputtedDateRangeValid}
                 onClick={() => {
-                  const newInputtedDate = {
-                    ...inputDate,
-                    ...(ref_dateFrom.current ? { from: stringToDate(ref_dateFrom.current) } : {}),
-                    ...(ref_dateTo.current ? { to: stringToDate(ref_dateTo.current) } : {}),
-                  };
-
-                  setDate(newInputtedDate);
-                  setInputDate(newInputtedDate);
+                  setDate({
+                    from: inputDate.from,
+                    to: inputDate.to,
+                  });
+                  setIsOpen(false);
                 }}
               >
                 Apply <CornerDownLeft className="size-4" />
