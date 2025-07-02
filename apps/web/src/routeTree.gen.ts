@@ -10,12 +10,19 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SelectTestPageRouteImport } from './routes/select-test-page'
+import { Route as DateTestPageRouteImport } from './routes/date-test-page'
 import { Route as ButtonTestPageRouteImport } from './routes/button-test-page'
 import { Route as BlogRouteImport } from './routes/blog'
+import { Route as IndexRouteImport } from './routes/index'
 
 const SelectTestPageRoute = SelectTestPageRouteImport.update({
   id: '/select-test-page',
   path: '/select-test-page',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DateTestPageRoute = DateTestPageRouteImport.update({
+  id: '/date-test-page',
+  path: '/date-test-page',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ButtonTestPageRoute = ButtonTestPageRouteImport.update({
@@ -28,34 +35,63 @@ const BlogRoute = BlogRouteImport.update({
   path: '/blog',
   getParentRoute: () => rootRouteImport,
 } as any)
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
   '/blog': typeof BlogRoute
   '/button-test-page': typeof ButtonTestPageRoute
+  '/date-test-page': typeof DateTestPageRoute
   '/select-test-page': typeof SelectTestPageRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof IndexRoute
   '/blog': typeof BlogRoute
   '/button-test-page': typeof ButtonTestPageRoute
+  '/date-test-page': typeof DateTestPageRoute
   '/select-test-page': typeof SelectTestPageRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
   '/blog': typeof BlogRoute
   '/button-test-page': typeof ButtonTestPageRoute
+  '/date-test-page': typeof DateTestPageRoute
   '/select-test-page': typeof SelectTestPageRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/blog' | '/button-test-page' | '/select-test-page'
+  fullPaths:
+    | '/'
+    | '/blog'
+    | '/button-test-page'
+    | '/date-test-page'
+    | '/select-test-page'
   fileRoutesByTo: FileRoutesByTo
-  to: '/blog' | '/button-test-page' | '/select-test-page'
-  id: '__root__' | '/blog' | '/button-test-page' | '/select-test-page'
+  to:
+    | '/'
+    | '/blog'
+    | '/button-test-page'
+    | '/date-test-page'
+    | '/select-test-page'
+  id:
+    | '__root__'
+    | '/'
+    | '/blog'
+    | '/button-test-page'
+    | '/date-test-page'
+    | '/select-test-page'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
   BlogRoute: typeof BlogRoute
   ButtonTestPageRoute: typeof ButtonTestPageRoute
+  DateTestPageRoute: typeof DateTestPageRoute
   SelectTestPageRoute: typeof SelectTestPageRoute
 }
 
@@ -66,6 +102,13 @@ declare module '@tanstack/react-router' {
       path: '/select-test-page'
       fullPath: '/select-test-page'
       preLoaderRoute: typeof SelectTestPageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/date-test-page': {
+      id: '/date-test-page'
+      path: '/date-test-page'
+      fullPath: '/date-test-page'
+      preLoaderRoute: typeof DateTestPageRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/button-test-page': {
@@ -82,12 +125,21 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
   BlogRoute: BlogRoute,
   ButtonTestPageRoute: ButtonTestPageRoute,
+  DateTestPageRoute: DateTestPageRoute,
   SelectTestPageRoute: SelectTestPageRoute,
 }
 export const routeTree = rootRouteImport

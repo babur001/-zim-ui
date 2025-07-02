@@ -6,7 +6,7 @@ const ButtonTestPage = () => {
   return (
     <div className="grid grid-cols-5 mx-auto gap-5 py-10 px-5 ">
       <Button size="default" variant="default">
-        ZimZim <ArrowRight className="group-hover:translate-x-1.5 duration-300" />
+        ZimZim <ArrowRight className="group-hover:translate-x-1 !stroke-2 duration-300" />
       </Button>
       <Button size="default" variant="secondary">
         Button secondary

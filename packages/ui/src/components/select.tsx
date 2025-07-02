@@ -119,7 +119,7 @@ export function Select<T extends object>({
       return new Array(2).fill(<CommandItem className="bg-accent/20 !mb-1 animate-pulse" />);
     }
 
-    return frameworks.map((framework) => (
+    return frameworks.map((framework, idx) => (
       <CommandItem data-checked={value?.value === framework.value} key={framework.value} value={framework.value} onSelect={() => onSelect(framework)}>
         {framework.title}
         <Check className={cn("ml-auto", value?.value === framework.value ? "opacity-100" : "opacity-0 !text-red-400")} />
