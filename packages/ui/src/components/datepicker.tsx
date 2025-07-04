@@ -79,15 +79,7 @@ const ButtonDatePickerTriggerer = ({
   );
 };
 
-const DatePickerForm = ({
-  date,
-  submitBtnTitle,
-  onSubmit,
-}: {
-  date?: TDateRangeValue;
-  submitBtnTitle?: React.ReactNode;
-  onSubmit?: (params: TDateRangeValue) => unknown;
-}) => {
+const DatePickerForm = ({ date, onSubmit, locale }: { date?: TDateRangeValue; locale: TDateRangeLocale; onSubmit?: (params: TDateRangeValue) => unknown }) => {
   const [isSubmitted, setIsSubmitted] = React.useState(false);
 
   const [inputDate, setInputDate] = React.useState<{ from: DateValue | undefined; to: DateValue | undefined }>(
@@ -102,17 +94,17 @@ const DatePickerForm = ({
     const errObject: { start?: string; end?: string; general?: string } = {};
 
     if (!range.from) {
-      errObject["start"] = "Start date is required";
+      errObject["start"] = locale.startDateRequred;
     }
 
     if (!range.to) {
-      errObject["end"] = "End date is required";
+      errObject["end"] = locale.endDateRequired;
     }
 
     const isStartBeforeEnd = range.from && range.to ? range.from.compare(range.to) <= 0 : false;
 
     if (!isStartBeforeEnd) {
-      errObject["general"] = "End date must be after start date";
+      errObject["general"] = locale.endDateMustBeAfterStatDate;
     }
 
     return errObject;
@@ -144,7 +136,7 @@ const DatePickerForm = ({
     >
       <div className="space-y-3">
         <div className="space-y-1">
-          <span className="block text-sm text-accent font-light">Start</span>
+          <span className="block text-sm text-accent font-light">{locale.from}</span>
 
           <DateField
             aria-label="start"
@@ -165,7 +157,7 @@ const DatePickerForm = ({
         </div>
 
         <div className="space-y-1">
-          <span className="block text-sm text-accent font-light">End</span>
+          <span className="block text-sm text-accent font-light">{locale.to}</span>
 
           <DateField
             aria-label="end"
@@ -189,21 +181,37 @@ const DatePickerForm = ({
 
       <Button asChild variant="secondary" size="sm" className="w-full" type="submit">
         <ButtonRac type="submit">
-          {submitBtnTitle} <CornerDownLeft className="size-4" />
+          {locale.btnSubmit} <CornerDownLeft className="size-4" />
         </ButtonRac>
       </Button>
     </Form>
   );
 };
 
+interface TDateRangeLocale {
+  btnSubmit: string;
+  from: string;
+  to: string;
+  startDateRequred: string;
+  endDateRequired: string;
+  endDateMustBeAfterStatDate: string;
+}
+
 const DateRangePicker = ({
   className,
   placeholder = "Select date",
-  enterButtonTitle = "Apply",
+  locale = {
+    btnSubmit: "Apply",
+    from: "From",
+    to: "To",
+    startDateRequred: "Start date is required",
+    endDateRequired: "End date is required",
+    endDateMustBeAfterStatDate: "End date must be after start date",
+  },
 }: {
   className?: string;
   placeholder?: string;
-  enterButtonTitle?: React.ReactNode;
+  locale?: TDateRangeLocale;
 }) => {
   const [isOpen, setIsOpen] = React.useState(false);
 
@@ -221,7 +229,7 @@ const DateRangePicker = ({
         }}
       >
         <PopoverTrigger asChild onClick={() => setIsOpen((prev) => !prev)}>
-          <ButtonDatePickerTriggerer type="range" date={date} onClear={() => setDate({ from: undefined, to: undefined })} />
+          <ButtonDatePickerTriggerer placeholder={placeholder} type="range" date={date} onClear={() => setDate({ from: undefined, to: undefined })} />
         </PopoverTrigger>
 
         <PopoverContent className="w-full px-3 py-3 shadow-md" align="center">
@@ -248,7 +256,7 @@ const DateRangePicker = ({
 
             <DatePickerForm
               date={date}
-              submitBtnTitle={enterButtonTitle}
+              locale={locale}
               onSubmit={(range) => {
                 setDate(range);
                 setIsOpen(false);
@@ -261,15 +269,7 @@ const DateRangePicker = ({
   );
 };
 
-const DatePicker = ({
-  className,
-  placeholder = "Select date",
-  enterButtonTitle = "Apply",
-}: {
-  className?: string;
-  placeholder?: string;
-  enterButtonTitle?: React.ReactNode;
-}) => {
+const DatePicker = ({ className, placeholder = "Select date" }: { className?: string; placeholder?: string }) => {
   const [date, setDate] = React.useState<DateValue | undefined>(undefined);
 
   const [isOpen, setIsOpen] = React.useState(false);
@@ -283,7 +283,7 @@ const DatePicker = ({
         }}
       >
         <PopoverTrigger asChild onClick={() => setIsOpen((prev) => !prev)}>
-          <ButtonDatePickerTriggerer type="simple" date={date} onClear={() => setDate(undefined)} />
+          <ButtonDatePickerTriggerer placeholder={placeholder} type="simple" date={date} onClear={() => setDate(undefined)} />
         </PopoverTrigger>
 
         <PopoverContent className="w-full px-3 py-3 shadow-md" align="center">
