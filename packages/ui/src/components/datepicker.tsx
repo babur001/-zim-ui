@@ -18,34 +18,50 @@ type TDateRangeValue = {
   to: DateValue | undefined;
 };
 
+interface IButtonDatePickerTriggererSimple {
+  type: "simple";
+  date?: DateValue;
+  placeholder?: React.ReactNode;
+  onClear: () => unknown;
+}
+
+interface IButtonDatePickerTriggererRange {
+  type: "range";
+  date?: TDateRangeValue;
+  placeholder?: React.ReactNode;
+  onClear: () => unknown;
+}
+
 const ButtonDatePickerTriggerer = ({
   date,
   placeholder = "Select date",
   onClear,
+  type,
   ...buttonProps
-}: React.HTMLAttributes<HTMLButtonElement> & {
-  date: TDateRangeValue;
-  placeholder?: React.ReactNode;
-  onClear: () => unknown;
-}) => {
+}: (IButtonDatePickerTriggererSimple | IButtonDatePickerTriggererRange) & React.HTMLAttributes<HTMLButtonElement>) => {
   return (
     <Button
       id="date"
       variant="secondary"
-      className={cn("w-full min-w-48 hover:scale-100 justify-start text-left font-normal", !date.from && "text-accent")}
+      className={cn("w-full min-w-48 hover:scale-100 justify-start text-left font-normal", {
+        "text-accent": (type === "simple" && !date) || (type === "range" && !date?.from && !date?.to),
+      })}
       {...buttonProps}
     >
       <CalendarIcon className="mr-2 h-4 w-4" />
 
       <div className="flex items-center justify-center gap-3 flex-1 flex-grow">
-        {date.from && date.to ? (
-          <span>{formatter.formatRange(date.from.toDate(getLocalTimeZone()), date.to.toDate(getLocalTimeZone()))}</span>
-        ) : (
-          <span>{placeholder}</span>
-        )}
+        {(() => {
+          if (type === "simple" && date) return <>{formatter.format(date.toDate(getLocalTimeZone()))}</>;
+          if (type === "range" && date?.from && date?.to) {
+            return <span>{formatter.formatRange(date.from.toDate(getLocalTimeZone()), date.to.toDate(getLocalTimeZone()))}</span>;
+          }
+
+          return <span>{placeholder}</span>;
+        })()}
       </div>
 
-      {date.from || date.to ? (
+      {(type === "simple" && date) || (type === "range" && date?.from && date.to) ? (
         <Button
           onClick={(e) => {
             e.stopPropagation();
@@ -189,73 +205,58 @@ const DateRangePicker = ({
   placeholder?: string;
   enterButtonTitle?: React.ReactNode;
 }) => {
+  const [isOpen, setIsOpen] = React.useState(false);
+
   const [date, setDate] = React.useState<{ from: DateValue | undefined; to: DateValue | undefined }>({
     from: undefined,
     to: undefined,
   });
 
-  const [isOpen, setIsOpen] = React.useState(false);
-
   return (
-    <div className="grid grid-cols-5 gap-10 p-5">
-      <Calendar />
-
-      <RangeCalendar />
-
-      <ButtonDatePickerTriggerer placeholder={placeholder} date={date} onClear={() => {}} />
-
-      <DatePickerForm
-        date={date}
-        onSubmit={(range) => {
-          console.log(range);
+    <div className={cn("grid gap-2", className)}>
+      <Popover
+        open={isOpen}
+        onOpenChange={(e) => {
+          if (!e) return setIsOpen(false);
         }}
-        submitBtnTitle={enterButtonTitle}
-      />
+      >
+        <PopoverTrigger asChild onClick={() => setIsOpen((prev) => !prev)}>
+          <ButtonDatePickerTriggerer type="range" date={date} onClear={() => setDate({ from: undefined, to: undefined })} />
+        </PopoverTrigger>
 
-      <div className={cn("grid gap-2", className)}>
-        <Popover
-          open={isOpen}
-          onOpenChange={(e) => {
-            if (!e) return setIsOpen(false);
-          }}
-        >
-          <PopoverTrigger asChild onClick={() => setIsOpen((prev) => !prev)}>
-            <ButtonDatePickerTriggerer date={date} onClear={() => setDate({ from: undefined, to: undefined })} />
-          </PopoverTrigger>
+        <PopoverContent className="w-full px-3 py-3 shadow-md" align="center">
+          <div className="flex gap-7">
+            <RangeCalendar
+              value={
+                date.from && date.to
+                  ? {
+                      start: date.from,
+                      end: date.to,
+                    }
+                  : undefined
+              }
+              onChange={(e) => {
+                const newDateRange = {
+                  from: e.start,
+                  to: e.end,
+                };
 
-          <PopoverContent className="w-full px-3 py-3 shadow-md" align="center">
-            <div className="flex gap-7">
-              <RangeCalendar
-                value={
-                  date.from && date.to
-                    ? {
-                        start: date.from,
-                        end: date.to,
-                      }
-                    : undefined
-                }
-                onChange={(e) => {
-                  const newDateRange = {
-                    from: e.start,
-                    to: e.end,
-                  };
+                setIsOpen(false);
+                setDate(newDateRange);
+              }}
+            />
 
-                  setIsOpen(false);
-                  setDate(newDateRange);
-                }}
-              />
-
-              <DatePickerForm
-                date={date}
-                submitBtnTitle={enterButtonTitle}
-                onSubmit={(range) => {
-                  console.log(range);
-                }}
-              />
-            </div>
-          </PopoverContent>
-        </Popover>
-      </div>
+            <DatePickerForm
+              date={date}
+              submitBtnTitle={enterButtonTitle}
+              onSubmit={(range) => {
+                setDate(range);
+                setIsOpen(false);
+              }}
+            />
+          </div>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 };
@@ -269,73 +270,34 @@ const DatePicker = ({
   placeholder?: string;
   enterButtonTitle?: React.ReactNode;
 }) => {
-  const [date, setDate] = React.useState<{ from: DateValue | undefined; to: DateValue | undefined }>({
-    from: undefined,
-    to: undefined,
-  });
+  const [date, setDate] = React.useState<DateValue | undefined>(undefined);
 
   const [isOpen, setIsOpen] = React.useState(false);
 
   return (
-    <div className="grid grid-cols-5 gap-10 p-5">
-      <Calendar />
-
-      <RangeCalendar />
-
-      <ButtonDatePickerTriggerer placeholder={placeholder} date={date} onClear={() => {}} />
-
-      <DatePickerForm
-        date={date}
-        onSubmit={(range) => {
-          console.log(range);
+    <div className={cn("grid gap-2", className)}>
+      <Popover
+        open={isOpen}
+        onOpenChange={(e) => {
+          if (!e) return setIsOpen(false);
         }}
-        submitBtnTitle={enterButtonTitle}
-      />
+      >
+        <PopoverTrigger asChild onClick={() => setIsOpen((prev) => !prev)}>
+          <ButtonDatePickerTriggerer type="simple" date={date} onClear={() => setDate(undefined)} />
+        </PopoverTrigger>
 
-      <div className={cn("grid gap-2", className)}>
-        <Popover
-          open={isOpen}
-          onOpenChange={(e) => {
-            if (!e) return setIsOpen(false);
-          }}
-        >
-          <PopoverTrigger asChild onClick={() => setIsOpen((prev) => !prev)}>
-            <ButtonDatePickerTriggerer date={date} onClear={() => setDate({ from: undefined, to: undefined })} />
-          </PopoverTrigger>
-
-          <PopoverContent className="w-full px-3 py-3 shadow-md" align="center">
-            <div className="flex gap-7">
-              <RangeCalendar
-                value={
-                  date.from && date.to
-                    ? {
-                        start: date.from,
-                        end: date.to,
-                      }
-                    : undefined
-                }
-                onChange={(e) => {
-                  const newDateRange = {
-                    from: e.start,
-                    to: e.end,
-                  };
-
-                  setIsOpen(false);
-                  setDate(newDateRange);
-                }}
-              />
-
-              <DatePickerForm
-                date={date}
-                submitBtnTitle={enterButtonTitle}
-                onSubmit={(range) => {
-                  console.log(range);
-                }}
-              />
-            </div>
-          </PopoverContent>
-        </Popover>
-      </div>
+        <PopoverContent className="w-full px-3 py-3 shadow-md" align="center">
+          <div className="flex gap-7">
+            <Calendar
+              value={date}
+              onChange={(e) => {
+                setIsOpen(false);
+                setDate(e);
+              }}
+            />
+          </div>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 };
