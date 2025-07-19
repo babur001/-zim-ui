@@ -1,9 +1,7 @@
 import "dotenv/config";
-import { createExpressMiddleware } from "@trpc/server/adapters/express";
-import { createContext } from "./lib/context";
-import { appRouter } from "./routers/index";
 import cors from "cors";
 import express from "express";
+import ProductController from "./controllers/product.controller";
 
 const app = express();
 
@@ -14,19 +12,11 @@ app.use(
   })
 );
 
-app.use(
-  "/trpc",
-  createExpressMiddleware({
-    router: appRouter,
-    createContext,
-  })
-);
-
 app.use(express.json());
 
-app.get("/", (_req, res) => {
-  res.status(200).send("OK");
-});
+app.get("/products", ProductController.list);
+app.get("/products/:id", ProductController.getById);
+app.post("/products/add", ProductController.add);
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {

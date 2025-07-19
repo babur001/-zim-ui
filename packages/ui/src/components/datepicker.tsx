@@ -5,7 +5,7 @@ import { cn } from "#/lib/utils";
 import { Calendar, RangeCalendar } from "#/components/calendar";
 import { CalendarIcon, CornerDownLeft, X } from "lucide-react";
 import { DateFormatter, getLocalTimeZone } from "@internationalized/date";
-import { DateField, DateInput, DateSegment, Button as ButtonRac, Form, type DateValue } from "react-aria-components";
+import { DateField, DateInput, DateSegment, Button as ButtonRac, Form, type DateValue, type DateFieldProps, type DateInputProps } from "react-aria-components";
 
 const formatter = new DateFormatter(navigator.language ?? "ru-RU", {
   year: "numeric",
@@ -31,6 +31,30 @@ interface IButtonDatePickerTriggererRange {
   placeholder?: React.ReactNode;
   onClear: () => unknown;
 }
+
+const DateInputField = ({
+  label,
+  value,
+  onChange,
+  error,
+  onKeyDown,
+}: {
+  label: string;
+  value: DateValue | undefined;
+  error?: string;
+  onChange: (value: DateValue | null) => void;
+  onKeyDown?: (e: React.KeyboardEvent) => void;
+}) => (
+  <div className="space-y-1">
+    <span className="block text-sm text-gray-500 font-light">{label}</span>
+    <DateField aria-label={label.toLowerCase()} value={value} onChange={onChange} onKeyDown={onKeyDown}>
+      <DateInput className="bg-white rounded-md border border-gray-300 focus-within:ring-2 ring-blue-500 duration-200 h-12 flex items-center px-2">
+        {(segment) => <DateSegment className="data-[focused=true]:bg-gray-200 px-0.5 rounded-sm outline-0" segment={segment} />}
+      </DateInput>
+      {error && <span className="text-xs text-red-600">{error}</span>}
+    </DateField>
+  </div>
+);
 
 const ButtonDatePickerTriggerer = ({
   date,
@@ -91,28 +115,19 @@ const DatePickerForm = ({ date, onSubmit, locale }: { date?: TDateRangeValue; lo
   );
 
   const validate = (range: typeof inputDate) => {
-    const errObject: { start?: string; end?: string; general?: string } = {};
+    const errors: { start?: string; end?: string; general?: string } = {};
 
-    if (!range.from) {
-      errObject["start"] = locale.startDateRequred;
+    if (!range.from) errors.start = locale.startDateRequired;
+    if (!range.to) errors.end = locale.endDateRequired;
+    if (range.from && range.to && range.from.compare(range.to) > 0) {
+      errors.general = locale.endDateMustBeAfterStartDate;
     }
-
-    if (!range.to) {
-      errObject["end"] = locale.endDateRequired;
-    }
-
-    const isStartBeforeEnd = range.from && range.to ? range.from.compare(range.to) <= 0 : false;
-
-    if (!isStartBeforeEnd) {
-      errObject["general"] = locale.endDateMustBeAfterStatDate;
-    }
-
-    return errObject;
+    return errors;
   };
 
   const errors = isSubmitted ? validate(inputDate) : {};
 
-  const submitByEnterCb = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       // Manually dispatch submit event
       const form = e.currentTarget.closest("form");
@@ -120,63 +135,45 @@ const DatePickerForm = ({ date, onSubmit, locale }: { date?: TDateRangeValue; lo
     }
   };
 
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmitted(true);
+    const errors = validate(inputDate);
+
+    // if errors is empty -> valdiation passes
+    if (Object.keys(errors).length === 0) {
+      onSubmit && onSubmit(inputDate);
+    }
+  };
+
   return (
-    <Form
-      onSubmit={(e) => {
-        e.preventDefault();
-        setIsSubmitted(true);
-        const errors = validate(inputDate);
-
-        // if errors is empty -> valdiation passes
-        if (Object.keys(errors).length === 0) {
-          onSubmit && onSubmit(inputDate);
-        }
-      }}
-      className="flex flex-col justify-between flex-1 w-48"
-    >
+    <Form onSubmit={handleSubmit} className="flex flex-col justify-between flex-1 w-48">
       <div className="space-y-3">
-        <div className="space-y-1">
-          <span className="block text-sm text-accent font-light">{locale.from}</span>
+        <DateInputField
+          label={locale.from}
+          value={inputDate.from}
+          error={errors.start}
+          onChange={(e) => {
+            setInputDate((prev) => ({
+              ...prev,
+              from: e ?? undefined,
+            }));
+          }}
+          onKeyDown={handleKeyDown}
+        />
 
-          <DateField
-            aria-label="start"
-            value={inputDate.from}
-            onChange={(e) => {
-              setInputDate((prev) => ({
-                ...prev,
-                from: e ?? undefined,
-              }));
-            }}
-            onKeyDown={submitByEnterCb}
-          >
-            <DateInput className="bg-white rounded-md border-[0.25px] border-accent/40 focus-within:ring-2 ring-ring duration-200 h-12 flex items-center px-2">
-              {(segment) => <DateSegment className="data-[focused=true]:bg-gray-200 px-0.5 rounded-xs outline-0" segment={segment} />}
-            </DateInput>
-            {errors.start ? <span className="text-xs text-destructive">{errors.start}</span> : null}
-          </DateField>
-        </div>
-
-        <div className="space-y-1">
-          <span className="block text-sm text-accent font-light">{locale.to}</span>
-
-          <DateField
-            aria-label="end"
-            value={inputDate.to}
-            onChange={(e) => {
-              setInputDate((prev) => ({
-                ...prev,
-                to: e ?? undefined,
-              }));
-            }}
-            onKeyDown={submitByEnterCb}
-          >
-            <DateInput className="bg-white rounded-md border-[0.25px] border-accent/40 focus-within:ring-2 ring-ring duration-200 h-12 flex items-center px-2">
-              {(segment) => <DateSegment className="data-[focused=true]:bg-gray-200 px-0.5 rounded-xs outline-0" segment={segment} />}
-            </DateInput>
-            {errors.end ? <span className="text-xs block text-destructive">{errors.end}</span> : null}
-            {errors.general ? <span className="text-xs block text-destructive">{errors.general}</span> : null}
-          </DateField>
-        </div>
+        <DateInputField
+          label={locale.to}
+          value={inputDate.to}
+          error={errors.start}
+          onChange={(e) => {
+            setInputDate((prev) => ({
+              ...prev,
+              to: e ?? undefined,
+            }));
+          }}
+          onKeyDown={handleKeyDown}
+        />
       </div>
 
       <Button asChild variant="secondary" size="sm" className="w-full" type="submit">
@@ -192,9 +189,9 @@ interface TDateRangeLocale {
   btnSubmit: string;
   from: string;
   to: string;
-  startDateRequred: string;
+  startDateRequired: string;
   endDateRequired: string;
-  endDateMustBeAfterStatDate: string;
+  endDateMustBeAfterStartDate: string;
 }
 
 const DateRangePicker = ({
@@ -204,9 +201,9 @@ const DateRangePicker = ({
     btnSubmit: "Apply",
     from: "From",
     to: "To",
-    startDateRequred: "Start date is required",
+    startDateRequired: "Start date is required",
     endDateRequired: "End date is required",
-    endDateMustBeAfterStatDate: "End date must be after start date",
+    endDateMustBeAfterStartDate: "End date must be after start date",
   },
 }: {
   className?: string;

@@ -38,8 +38,8 @@ function Button({
   loading = false,
   children,
   ...props
-}: React.ComponentProps<"button"> &
-  VariantProps<typeof buttonVariants> & {
+}: VariantProps<typeof buttonVariants> &
+  React.ComponentProps<"button"> & {
     asChild?: boolean;
     loading?: boolean;
   }) {

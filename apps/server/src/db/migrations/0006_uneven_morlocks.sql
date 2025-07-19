@@ -1,0 +1,2 @@
+-- ALTER TABLE "PRODUCT_VARIANT" ALTER COLUMN "pricing_calc_by" SET DEFAULT 'uzs';--> statement-breakpoint
+-- ALTER TABLE "PRODUCT_VARIANT" ALTER COLUMN "unit" SET DEFAULT 'piece';

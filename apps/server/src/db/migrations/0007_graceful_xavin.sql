@@ -1,0 +1,4 @@
+-- ALTER TABLE "PRODUCT_VARIANT" ALTER COLUMN "pricing_calc_by" DROP DEFAULT;--> statement-breakpoint
+-- ALTER TABLE "PRODUCT_VARIANT" ALTER COLUMN "pricing_calc_by" DROP NOT NULL;--> statement-breakpoint
+-- ALTER TABLE "PRODUCT_VARIANT" ALTER COLUMN "unit" DROP DEFAULT;--> statement-breakpoint
+-- ALTER TABLE "PRODUCT_VARIANT" ALTER COLUMN "unit" DROP NOT NULL;
